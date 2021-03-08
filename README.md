@@ -11,7 +11,7 @@ composer require pctco/email dev-master
 ## example
 ### send email
 ```
-Email::send([
+Pctco\Email::send([
    'toEmail'   =>   '',
    'subject'   =>   '',
    'contents'   =>   ''

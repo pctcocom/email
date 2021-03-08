@@ -23,12 +23,12 @@ class Email{
       ],$options);
 
       if(empty($options['toEmail'])) return false;
-      
+
       try{
          $server = 'smtp.qq.com';
          $protocol = 'default';
          $port = 25;
-         $username = '12999026@qq.com';
+         $account = '12999026@qq.com';
          $password = 'hnhlfnoqicawbhii';
          $nickname = 'Java Development program';
 
@@ -38,12 +38,12 @@ class Email{
          $Mailer->CharSet = 'UTF-8';//编码
          $Mailer->Debugoutput = 'html';// 支持HTML格式
          $Mailer->Host = $server; // host地址
-         if ($protocol != 'default') $Mailer->SMTPSecure = $protocol;
+         if ($protocol != 'Default') $Mailer->SMTPSecure = $protocol;
          $Mailer->Port = $port;//端口
          $Mailer->SMTPAuth = true;
-         $Mailer->Username = $username;//用户名
+         $Mailer->Username = $account;//用户名
          $Mailer->Password = $password;//密码
-         $Mailer->SetFrom($username,$nickname);//发件人地址, 发件人名称
+         $Mailer->SetFrom($account,$nickname);//发件人地址, 发件人名称
          $Mailer->AddAddress($options['toEmail']);//收信人地址
          $Mailer->Subject = $options['subject'];//邮件标题
          $Mailer->MsgHTML($options['contents']);

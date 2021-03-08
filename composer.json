@@ -1,0 +1,34 @@
+{
+    "name": "pctco/email",
+    "type": "project",
+    "keywords": ["Email"],
+    "homepage": "https://pctco.com",
+    "license": "MIT",
+    "description": "Mail management!",
+    "authors": [
+        {
+            "name": "pctco",
+            "email": "pctco.com@gmail.com",
+            "homepage": "https://pctco.com",
+            "role": "Developer"
+        }
+    ],
+    "support": {
+        "email": "pctco.com@gmail.com",
+        "issues": "https://github.com/pctcocom/date/issues",
+        "forum": "https://pctco.com",
+        "source": "https://github.com/pctcocom/file"
+    },
+    "require": {
+        "php": ">=7.1"
+    },
+    "suggest": {
+        "ext-event": "For better date configuration."
+    },
+    "autoload": {
+        "psr-4": {
+            "Pctco\\File\\": "src"
+        }
+    },
+    "minimum-stability": "dev"
+}

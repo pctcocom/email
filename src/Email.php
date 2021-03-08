@@ -7,15 +7,23 @@ use PHPMailer\PHPMailer\SMTP;
  * 数据
  */
 class Email{
-   /**
-    * 发送邮件 Email::send('toEmail','subject','contents');
+    /**
+    * @name send
+    * @describe send email
     * @param  string $to        接收人邮件地址
     * @param  string $subject     邮件标题
     * @param  string $contents  邮件内容 支持HTML格式
     * @return Boolean
-    */
-    public static function send($toEmail,$subject,$contents){
-      if(empty($toEmail)) return false;
+    **/
+    public static function send($options){
+      $options = array_merge([
+         'toEmail'   =>   '',
+         'subject'   =>   '',
+         'contents'   =>   ''
+      ],$options);
+
+      if(empty($options['toEmail'])) return false;
+      
       try{
          $server = 'smtp.qq.com';
          $protocol = 'default';
@@ -36,9 +44,9 @@ class Email{
          $Mailer->Username = $username;//用户名
          $Mailer->Password = $password;//密码
          $Mailer->SetFrom($username,$nickname);//发件人地址, 发件人名称
-         $Mailer->AddAddress($toEmail);//收信人地址
-         $Mailer->Subject = $subject;//邮件标题
-         $Mailer->MsgHTML($contents);
+         $Mailer->AddAddress($options['toEmail']);//收信人地址
+         $Mailer->Subject = $options['subject'];//邮件标题
+         $Mailer->MsgHTML($options['contents']);
          if ($Mailer->Send()){
             return true;
          }else{

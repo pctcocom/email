@@ -3,9 +3,7 @@ namespace Pctco\Email;
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 use PHPMailer\PHPMailer\SMTP;
-/**
- * 数据
- */
+use think\facade\Cache;
 class Email{
     /**
     * @name send
@@ -25,12 +23,15 @@ class Email{
       if(empty($options['toEmail'])) return false;
 
       try{
-         $server = 'smtp.qq.com';
-         $protocol = 'default';
-         $port = 25;
-         $account = '12999026@qq.com';
-         $password = 'hnhlfnoqicawbhii';
-         $nickname = 'Java Development program';
+         $var = Cache::get(md5('app\admin\controller\Config\email\var'));
+
+         $server = $var['config.email.server'];
+         $protocol = $var['config.email.protocol'];
+         $port = $var['config.email.port'];
+         $account = $var['config.email.account'];
+         $password = $var['config.email.password'];
+         $nickname = $var['config.email.nickname'];
+
 
          $Mailer = new PhpMailer(true);
          //$Mailer->SMTPDebug = 0;                    // 是否调试

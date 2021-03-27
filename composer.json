@@ -15,9 +15,9 @@
     ],
     "support": {
         "email": "pctco.com@gmail.com",
-        "issues": "https://github.com/pctcocom/date/issues",
+        "issues": "https://github.com/pctcocom/email/issues",
         "forum": "https://pctco.com",
-        "source": "https://github.com/pctcocom/file"
+        "source": "https://github.com/pctcocom/email"
     },
     "require": {
         "php": ">=7.1"

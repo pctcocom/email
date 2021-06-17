@@ -23,14 +23,14 @@ class Email{
       if(empty($options['toEmail'])) return false;
 
       try{
-         $var = Cache::get(md5('app\admin\controller\Config\email\var'));
+         $var = Cache::store('config')->get(md5('app\admin\controller\Config\email\var'));
 
-         $server = $var['config.email.server'];
-         $protocol = $var['config.email.protocol'];
-         $port = $var['config.email.port'];
-         $account = $var['config.email.account'];
-         $password = $var['config.email.password'];
-         $nickname = $var['config.email.nickname'];
+         $server = $var['email']['server'];
+         $protocol = $var['email']['protocol'];
+         $port = $var['email']['port'];
+         $account = $var['email']['account'];
+         $password = $var['email']['password'];
+         $nickname = $var['email']['nickname'];
 
 
          $Mailer = new PhpMailer(true);

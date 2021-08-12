@@ -3,6 +3,7 @@ namespace Pctco\Email;
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 use PHPMailer\PHPMailer\SMTP;
+use app\model\Config as ModelConfig;
 use think\facade\Cache;
 use think\facade\Db;
 use think\facade\Config;
@@ -11,7 +12,10 @@ use Naucon\File\File;
 use Naucon\File\FileWriter;
 use Pctco\Info\Ip\Ip;
 class Email{
-   function __construct(){
+   function __construct(ModelConfig $ModelConfig){
+      $this->mconfig = $ModelConfig;
+
+
       $config = Cache::store('config')->get(md5('app\admin\controller\Config\email\var'));
       $config['config.email.minute'] = ((int)$config['email']['cycle'])/60;
 
@@ -67,6 +71,7 @@ class Email{
             'event'   =>   'get'
          ]);
          $options['contents'] = $template['content'];
+         $options['subject'] = $template['subject'];
       }
 
       $options['contents'] = $this->ReplaceVar($options['contents'],$options['var']);
@@ -96,14 +101,22 @@ class Email{
          $Mailer->Subject = $options['subject'];//邮件标题
          $Mailer->MsgHTML($options['contents']);
          if ($Mailer->Send()){
-            $this->success($options);
-            return true;
+            return $this->success($options);
          }else{
-            return false;
-            // return $Mailer->errorMessage();
+            return [
+               'headers' => 'Prompt info',
+               'status' => 'info',
+               'content' => 'Error message',
+               'sub' => $Mailer->errorMessage()
+            ];
          }
       }catch (phpmailerException $e){
-         return false;
+         return [
+            'headers' => 'Prompt info',
+            'status' => 'info',
+            'content' => 'Error message',
+            'sub' => 'phpmailerException'
+         ];
       }
    }
    /**
@@ -119,7 +132,7 @@ class Email{
       $where = [
          'n2' =>  $data['email'],
          'n3'     =>  $data['template'],
-         'n4'     =>  $this->config['config.email.code'],
+         'n4'     =>  $data['code'],
          'type'   =>   'email'
       ];
 
@@ -136,27 +149,32 @@ class Email{
       ->field('n4,time')
       ->where($where)->find();
       if (empty($email)) {
-         return json([
-            'headers' => 'Prompt info',
-            'status'=>'info',
-            'content'=>'验证码已失效',
-            'sub' => '当前验证代码已过期。请重新获取验证码！'
-         ]);
-      }
-      if ($email['n4'] != $data['code']) {
-         return json([
+         return [
             'headers' => 'Prompt info',
             'status'=>'info',
             'content'=>'验证码错误',
-            'sub' => '验证码不正确。请重新进入！'
-         ]);
+            'sub' => '验证码不正确。请重新填写！'
+         ];
+      }
+      if ($email['n4'] != $data['code']) {
+         return [
+            'headers' => 'Prompt info',
+            'status'=>'info',
+            'content'=>'验证码错误',
+            'sub' => '验证码不正确。请重新填写！'
+         ];
       }
 
       Db::name('temporary')
       ->order('time desc')
       ->where($where)->delete();
 
-      return true;
+      return [
+         'headers' => 'Prompt info',
+         'status'=>'success',
+         'content'=>'验证码成功',
+         'sub' => '邮件验证成功'
+      ];
    }
    /**
    * @name success
@@ -197,6 +215,13 @@ class Email{
          'event'   =>   false
       ],$options);
 
+      $options['subject'] =   '系统测试邮件';
+
+      $TemplateName = $this->mconfig->getEmailAttr['email-template'];
+
+      if (in_array($options['name'],array_keys($TemplateName))) {
+         $options['subject'] =   $TemplateName[$options['name']]['title'];
+      }
 
       $path = app()->getRootPath().'entrance'.DIRECTORY_SEPARATOR.'static'.DIRECTORY_SEPARATOR.'template'.DIRECTORY_SEPARATOR.'email'.DIRECTORY_SEPARATOR.$options['name'].'.html';
 
@@ -219,7 +244,8 @@ class Email{
       }
       return [
          'path'   =>   $path,
-         'content'   =>   $options['content']
+         'content'   =>   $options['content'],
+         'subject'   =>   $options['subject']
       ];
    }
    /**
@@ -229,7 +255,6 @@ class Email{
    * @return string
    **/
    public function ReplaceVar($contents,$var = []){
-
       $ini = config::get('initialize');
       $website = $ini['config']['website'];
 

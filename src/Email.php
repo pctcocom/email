@@ -11,9 +11,10 @@ use think\facade\Request;
 use Naucon\File\File;
 use Naucon\File\FileWriter;
 use Pctco\Info\Ip\Ip;
+use Pctco\Verification\Regexp;
 class Email{
-   function __construct(ModelConfig $ModelConfig){
-      $this->mconfig = $ModelConfig;
+   function __construct(){
+      $this->mconfig = new ModelConfig;
 
 
       $config = Cache::store('config')->get(md5('app\admin\controller\Config\email\var'));
@@ -62,12 +63,19 @@ class Email{
          ]
       ],$options);
 
-      if(empty($options['toEmail'])) return false;
+      $regexp = new Regexp($options['toEmail']);
+      if($regexp->check('email') === false) {
+         return [
+            'status' => 'info',
+            'tips' => 'Error message',
+            'message' => '请填写正确的邮箱！'
+         ];
+      };
 
       if ($options['template'] !== 0) {
          $template =
          $this->template([
-            'name'   =>   $options['template'],
+            'name'   =>   'system--'.$options['template'],
             'event'   =>   'get'
          ]);
          $options['contents'] = $template['content'];
@@ -104,18 +112,16 @@ class Email{
             return $this->success($options);
          }else{
             return [
-               'headers' => 'Prompt info',
                'status' => 'info',
-               'content' => 'Error message',
-               'sub' => $Mailer->errorMessage()
+               'tips' => 'Error message',
+               'message' => $Mailer->errorMessage()
             ];
          }
       }catch (phpmailerException $e){
          return [
-            'headers' => 'Prompt info',
             'status' => 'info',
-            'content' => 'Error message',
-            'sub' => 'phpmailerException'
+            'tips' => 'Error message',
+            'message' => 'phpmailerException'
          ];
       }
    }
@@ -150,18 +156,16 @@ class Email{
       ->where($where)->find();
       if (empty($email)) {
          return [
-            'headers' => 'Prompt info',
             'status'=>'info',
-            'content'=>'验证码错误',
-            'sub' => '验证码不正确。请重新填写！'
+            'tips'=>'验证码错误',
+            'message' => '验证码不正确。请重新填写！'
          ];
       }
       if ($email['n4'] != $data['code']) {
          return [
-            'headers' => 'Prompt info',
             'status'=>'info',
-            'content'=>'验证码错误',
-            'sub' => '验证码不正确。请重新填写！'
+            'tips'=>'验证码错误',
+            'message' => '验证码不正确。请重新填写！'
          ];
       }
 
@@ -170,10 +174,9 @@ class Email{
       ->where($where)->delete();
 
       return [
-         'headers' => 'Prompt info',
          'status'=>'success',
-         'content'=>'验证码成功',
-         'sub' => '邮件验证成功'
+         'tips'=>'验证码成功',
+         'message' => '邮件验证成功'
       ];
    }
    /**
@@ -190,10 +193,9 @@ class Email{
          'time'     =>  time()
       ]);
       return [
-         'headers' => 'Prompt info',
          'status'=>'success',
-         'content'=>'邮件发送成功，邮件有效期为 '.$this->config['config.email.minute'].' 分钟',
-         'sub' => 'Please do not send SMS messages to anyone!',
+         'tips'=>'邮件发送成功，邮件有效期为 '.$this->config['config.email.minute'].' 分钟',
+         'message' => 'Please do not send SMS messages to anyone!',
          // 邮件实际有效时间(分钟)
          'minute'   =>   $this->config['config.email.minute'],
          'second'   =>   60,  // 倒计时秒数
